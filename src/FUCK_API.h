@@ -1,7 +1,7 @@
 #pragma once
 #include <imgui.h>
 
-#define FUCK_API_VERSION 2
+#define FUCK_API_VERSION 3
 
 // ==================================================
 // [ SECTION 1 ] TYPES & INTERFACES
@@ -82,7 +82,8 @@ namespace FUCK
 		kNoMove          = 1 << 12,  // Prevents manual dragging by the user
 		kAutoResize      = 1 << 13,  // Sizes automatically to contents
 		kIgnoreUserScale = 1 << 14,  // Ignores global UI scaling slider
-		kCustomPosition  = 1 << 15   // Opts out of Host-managed pos saving/loading
+		kCustomPosition  = 1 << 15,  // Opts out of Host-managed pos saving/loading
+		kRenderDuringTM  = 1 << 16   // Renders when 'tm' (Toggle Menus) is set
 	};
 
 	enum class TableFlags
@@ -521,6 +522,17 @@ struct FUCK_Interface
 	void (*EndTooltip)();
 	void (*SetScrollHereY)(float);
 	bool (*InputTextMultiline)(const char*, char*, size_t, const ImVec2&, int);
+
+	// Version 3
+	void (*SetWindowFocus)();
+	void (*CloseCurrentPopup)();
+	void (*OpenPopup)(const char*, int);
+	bool (*BeginPopup)(const char*, int);
+	bool (*BeginPopupModal)(const char*, bool*, int);
+	bool (*IsWindowAppearing)();
+	void (*PushTextWrapPos)(float);
+	void (*PopTextWrapPos)();
+	void (*SetNavCursorVisible)(bool);
 };
 #pragma pack(pop)
 
@@ -1758,6 +1770,18 @@ namespace FUCK
 	// Overloads & Templates
 	// --------------------------------------------------
 
+	/// @brief Pushes a font scaled by a fractional multiplier. Must be paired with FUCK::PopFont().
+	inline void PushFontScaled(ImFont* font, float scale)
+	{
+		if (!font)
+			font = GetFont(Font::kRegular);
+
+		// Fallback to 30.0f (framework's base size) if font is somehow null
+		float baseSize = font ? font->LegacySize : 30.0f;
+
+		PushFont(font, baseSize * GetGlobalScale() * scale);
+	}
+
 	/// @brief Visual for UI widget editing. Handles Screen-Space and Window-Space.
 	inline void DrawEditorBounds(const ImVec2& min, const ImVec2& max, EditorBoundsState state = EditorBoundsState::kNormal, float thickness = 2.0f, bool screenSpace = false, const ImVec2* customAnchor = nullptr)
 	{
@@ -2001,6 +2025,66 @@ namespace FUCK
 		return changed;
 	}
 
+	// --------------------------------------------------
+	// Version 3
+	// --------------------------------------------------
+
+	inline void SetWindowFocus()
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->SetWindowFocus)
+			i->SetWindowFocus();
+	}
+
+	inline void CloseCurrentPopup()
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->CloseCurrentPopup)
+			i->CloseCurrentPopup();
+	}
+
+	inline void OpenPopup(const char* str_id, PopupFlags flags = PopupFlags::kNone)
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->OpenPopup)
+			i->OpenPopup(str_id, static_cast<int>(flags));
+	}
+
+	inline bool BeginPopup(const char* str_id, WindowFlags flags = WindowFlags::kNone)
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->BeginPopup)
+			return i->BeginPopup(str_id, static_cast<int>(flags));
+		return false;
+	}
+
+	inline bool BeginPopupModal(const char* name, bool* p_open = nullptr, WindowFlags flags = WindowFlags::kNone)
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->BeginPopupModal)
+			return i->BeginPopupModal(name, p_open, static_cast<int>(flags));
+		return false;
+	}
+
+	inline bool IsWindowAppearing()
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->IsWindowAppearing)
+			return i->IsWindowAppearing();
+		return false;
+	}
+
+	inline void PushTextWrapPos(float wrap_local_pos_x = 0.0f)
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->PushTextWrapPos)
+			i->PushTextWrapPos(wrap_local_pos_x);
+	}
+
+	inline void PopTextWrapPos()
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->PopTextWrapPos)
+			i->PopTextWrapPos();
+	}
+
+	inline void SetNavCursorVisible(bool visible)
+	{
+		if (auto i = GetInterface(); i && i->version >= 3 && i->SetNavCursorVisible)
+			i->SetNavCursorVisible(visible);
+	}
 }  // namespace FUCK
 
 // ==================================================
