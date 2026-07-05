@@ -31,7 +31,7 @@ public:
 
 	ImVec2 GetDefaultPos() const override
 	{
-		return FUCK::Scale(100.0f, 100.0f);
+		return FUCK::Scale(500.0f, 100.0f);
 	}
 
 private:
