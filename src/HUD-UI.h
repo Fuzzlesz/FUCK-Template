@@ -26,6 +26,7 @@ public:
 		       FUCK::WindowFlags::kAutoResize      |
 		       FUCK::WindowFlags::kPassInputToGame |
 		       FUCK::WindowFlags::kNoMove          |
+			   FUCK::WindowFlags::kRenderDuringTM  |
 		       FUCK::WindowFlags::kCloseOnGameMenu ;
 	}
 
