@@ -33,9 +33,7 @@ public:
 	}
 
 private:
-	bool _isOpen      = true;  // Starts true, Host will auto-suspend it during load screen/game menus with flag
-	bool _hudMenuOpen = false;
+	bool _isOpen = true;
 
-	FUCK::Image             _hudImage;
-	FUCK::MenuEventListener _menuListener;
+	FUCK::Image _hudImage;
 };
