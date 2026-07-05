@@ -1,15 +1,12 @@
 #pragma once
+
 #include "FUCK_API.h"
 
-class HudWidgetWindow : public FUCK::IWindow
+class HudWidgetWindow :
+	public FUCK::IWindow,
+	public REX::Singleton<HudWidgetWindow>
 {
 public:
-	static HudWidgetWindow* GetSingleton()
-	{
-		static HudWidgetWindow s;
-		return &s;
-	}
-
 	void Initialize();
 
 	const char* Id() const override { return "HUD_Widget"; }
@@ -26,7 +23,7 @@ public:
 		       FUCK::WindowFlags::kAutoResize      |
 		       FUCK::WindowFlags::kPassInputToGame |
 		       FUCK::WindowFlags::kNoMove          |
-			   FUCK::WindowFlags::kRenderDuringTM  |
+		       FUCK::WindowFlags::kRenderDuringTM  |
 		       FUCK::WindowFlags::kCloseOnGameMenu ;
 	}
 
@@ -36,8 +33,6 @@ public:
 	}
 
 private:
-	HudWidgetWindow() = default;
-
 	bool _isOpen      = true;  // Starts true, Host will auto-suspend it during load screen/game menus with flag
 	bool _hudMenuOpen = false;
 
