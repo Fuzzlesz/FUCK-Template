@@ -6,10 +6,10 @@ namespace FUCK_Register
 {
 	inline void Install()
 	{
-		// Initialize our listeners (hooks up HUDMenu detection)
 		HudWidgetWindow::GetSingleton()->Initialize();
+		HudWidgetRightAnchor::GetSingleton()->Initialize();
 
-		// Register the window into the framework so FUCK draws it
 		FUCK::RegisterWindow(HudWidgetWindow::GetSingleton());
+		FUCK::RegisterWindow(HudWidgetRightAnchor::GetSingleton());
 	}
 }

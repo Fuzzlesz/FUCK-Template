@@ -1,5 +1,6 @@
 #pragma once
 
+// A static image. The bare minimum: load a file, draw it, fixed position
 class HudWidgetWindow :
 	public FUCK::IWindow,
 	public REX::Singleton<HudWidgetWindow>
@@ -31,7 +32,45 @@ public:
 	}
 
 private:
-	bool _isOpen = true;
+	bool        _isOpen = true;
+	FUCK::Image _hudImage;
+};
 
+// An editable image. While the FUCK menu is open, FUCK lets the user move, scale and rotate it, and saves all three
+class HudWidgetRightAnchor :
+	public FUCK::IWindow,
+	public REX::Singleton<HudWidgetRightAnchor>
+{
+public:
+	void Initialize();
+
+	const char* Id() const override { return "HUD_Widget_Right"; }
+	const char* Title() const override { return "HUD Right Anchored"; }
+
+	void Draw() override;
+	bool IsOpen() const override { return _isOpen; }
+	void SetOpen(bool a_open) override { _isOpen = a_open; }
+
+	FUCK::WindowFlags GetFlags() const override
+	{
+		return FUCK::WindowFlags::kNoDecoration    |
+		       FUCK::WindowFlags::kNoBackground    |
+		       FUCK::WindowFlags::kAutoResize      |
+		       FUCK::WindowFlags::kPassInputToGame |
+		       FUCK::WindowFlags::kCloseOnGameMenu |
+		       FUCK::WindowFlags::kEditable        |
+		       FUCK::WindowFlags::kScalable        |
+		       FUCK::WindowFlags::kRotatable       |
+		       FUCK::WindowFlags::kAnchorRight     ;
+	}
+
+	// With kAnchorRight this is the top-right corner
+	ImVec2 GetDefaultPos() const override
+	{
+		return { FUCK::GetDisplaySize().x - FUCK::Scale(20.0f), FUCK::Scale(100.0f) };
+	}
+
+private:
+	bool        _isOpen = true;
 	FUCK::Image _hudImage;
 };
