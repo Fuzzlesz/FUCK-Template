@@ -1,7 +1,5 @@
 #pragma once
 
-#include "FUCK_API.h"
-
 class HudWidgetWindow :
 	public FUCK::IWindow,
 	public REX::Singleton<HudWidgetWindow>
