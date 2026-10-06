@@ -23,7 +23,7 @@ void InitializeLog()
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 	SKSE::PluginVersionData v;
 	v.PluginVersion(Version::MAJOR);
-	v.PluginName("HUD-WIDGET");
+	v.PluginName("FUCK-Template");
 	v.AuthorName("Fuzzles");
 	v.UsesAddressLibrary();
 	v.UsesUpdatedStructs();
@@ -34,7 +34,7 @@ extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
 	a_info->infoVersion = SKSE::PluginInfo::kVersion;
-	a_info->name        = "HUD-WIDGET";
+	a_info->name        = "FUCK-Template";
 	a_info->version     = Version::MAJOR;
 
 	if (a_skse->IsEditor()) {
@@ -53,7 +53,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	const auto messaging = SKSE::GetMessagingInterface();
 	messaging->RegisterListener([](SKSE::MessagingInterface::Message* msg) {
 		if (msg->type == SKSE::MessagingInterface::kDataLoaded) {
-			if (FUCK::Connect("HUD-WIDGET")) {
+			if (FUCK::Connect("FUCK-Template")) {
 				FUCK_Register::Install();
 
 			} else {

@@ -90,5 +90,6 @@ namespace stl
 #	define OFFSET(se, ae) se
 #endif
 
+#define FUCK_API_ENABLE_SIMPLEINI
 #include "API/FUCK_API.h"
 #include "Version.h"

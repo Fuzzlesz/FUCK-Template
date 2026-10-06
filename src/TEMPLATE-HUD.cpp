@@ -1,4 +1,4 @@
-#include "HUD-UI.h"
+#include "TEMPLATE-HUD.h"
 
 // ==================================================
 // Static Image

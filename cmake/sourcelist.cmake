@@ -1,5 +1,6 @@
 set(sources ${sources}
-	src/HUD-UI.cpp
 	src/PCH.cpp
+	src/TEMPLATE-HUD.cpp
+	src/TEMPLATE-Menu.cpp
 	src/main.cpp
 )
