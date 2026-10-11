@@ -15,6 +15,7 @@ public:
 	bool IsOpen() const override { return _isOpen; }
 	void SetOpen(bool a_open) override { _isOpen = a_open; }
 
+	// kHideWithHUD hides it with the game's HUD, during the intro, cutscenes and dialogue
 	FUCK::WindowFlags GetFlags() const override
 	{
 		return FUCK::WindowFlags::kNoDecoration    |
@@ -23,7 +24,8 @@ public:
 		       FUCK::WindowFlags::kPassInputToGame |
 		       FUCK::WindowFlags::kNoMove          |
 		       FUCK::WindowFlags::kRenderDuringTM  |
-		       FUCK::WindowFlags::kCloseOnGameMenu ;
+		       FUCK::WindowFlags::kCloseOnGameMenu |
+		       FUCK::WindowFlags::kHideWithHUD     ;
 	}
 
 	ImVec2 GetDefaultPos() const override
@@ -58,6 +60,7 @@ public:
 		       FUCK::WindowFlags::kAutoResize      |
 		       FUCK::WindowFlags::kPassInputToGame |
 		       FUCK::WindowFlags::kCloseOnGameMenu |
+		       FUCK::WindowFlags::kHideWithHUD     |
 		       FUCK::WindowFlags::kEditable        |
 		       FUCK::WindowFlags::kScalable        |
 		       FUCK::WindowFlags::kRotatable       |
