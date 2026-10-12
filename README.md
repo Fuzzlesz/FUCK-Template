@@ -1,4 +1,4 @@
-# Template for simple FUCK HUD widget.
+# Template for simple FUCK HUD widget and tool menu.
 
 ## Requirements
 * [CMake](https://cmake.org/)
@@ -19,23 +19,15 @@
 
 ## Building
 ```
-git clone https://github.com/Fuzzlesz/FUCK-WidgetTemplate.git
+git clone https://github.com/Fuzzlesz/FUCK-Template.git
 cd FUCK-WidgetTemplate
 # pull commonlib /extern to override the path settings
 git submodule init
 # to update submodules to checked in build
 git submodule update
-```
 
-### SSE
-```
-cmake --preset vs2022-windows-vcpkg-se
+cmake --preset vs2022-windows-vcpkg
 cmake --build build --config Release
 ```
-### AE
-```
-cmake --preset vs2022-windows-vcpkg-ae
-cmake --build buildae --config Release
-```
 ## License
-[MIT](LICENSE.md)
+[GPLv3](LICENSE.md)

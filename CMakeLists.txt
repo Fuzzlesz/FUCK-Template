@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 set(NAME "FUCK-Template" CACHE STRING "")
-set(VERSION 1.6.9)
+set(VERSION 1.6.0)
 
 # ---- Project ----
 
