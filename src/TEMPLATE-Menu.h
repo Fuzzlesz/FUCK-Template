@@ -2,12 +2,22 @@
 
 #include "TEMPLATE-HUD.h"  // Needed to toggle the HUD widgets
 
-// A template for a sidebar configuration menu.
+// A template for a sidebar configuration menu, a page in the FUCK menu.
+// It derives from FUCK::ITool to use OnClose (saving when the page is closed) and OnAsyncInput (watching for its hotkey in
+// gameplay). A page that only draws doesn't need a class like this: see FUCK::SimpleTool in FUCK_API.h.
 class MenuToolTemplate :
 	public FUCK::ITool,
 	public REX::Singleton<MenuToolTemplate>
 {
 public:
+	// The settings, each with its default. Public so the INI fields can name its members (see TEMPLATE-Menu.cpp)
+	struct Values
+	{
+		bool  showWidgets  = true;
+		float featureValue = 50.0f;
+		int   selectedType = 0;
+	};
+
 	// --- ITool Overrides ---
 
 	// Name(): The name of this specific tool page in the sidebar list (e.g. "General Settings")
@@ -29,10 +39,10 @@ private:
 	// Helper to push the boolean state to the actual widgets
 	void ApplyWidgetState();
 
-	// State variables
-	bool  _showWidgets  = true;
-	float _featureValue = 50.0f;
-	int   _selectedType = 0;
+	// Saves the settings (not the hotkey). Called by OnClose, and by the hotkey, which toggles the widgets in gameplay
+	void SaveSettings() const;
+
+	Values _values;
 
 	// Hotkey struct for toggling widget visibility
 	FUCK::ManagedHotkey _toggleHotkey;

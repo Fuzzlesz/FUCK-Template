@@ -1,59 +1,56 @@
 #include "TEMPLATE-Menu.h"
 
+// NOTE: To use FUCK::PluginSettings and FUCK::INI, you must have
+// #define FUCK_API_ENABLE_SIMPLEINI placed before including "FUCK_API.h" in your PCH.
+namespace
+{
+	// Each INI key named once, with the member it fills. Defaults come from the struct, and a value left at its default is
+	// taken out of the user's INI rather than written, keeping it clean
+	const FUCK::INI::Fields<MenuToolTemplate::Values> SETTINGS{ "Settings", {
+		{ "ShowWidgets",  &MenuToolTemplate::Values::showWidgets  },
+		{ "FeatureValue", &MenuToolTemplate::Values::featureValue },
+		{ "FeatureType",  &MenuToolTemplate::Values::selectedType },
+	} };
+
+	// Works for any struct, so the hotkey's own. FUCK::ManagedHotkey stores Mouse/KB and Gamepad bindings separately,
+	// each with up to 2 chorded modifiers (Shift, Ctrl, Alt)
+	const FUCK::INI::Fields<FUCK::ManagedHotkey> TOGGLE_KEYS{ "Toggle", {
+		{ "Key",    &FUCK::ManagedHotkey::kKey  },
+		{ "Mod1",   &FUCK::ManagedHotkey::kMod1 },
+		{ "Mod2",   &FUCK::ManagedHotkey::kMod2 },
+		{ "GPKey",  &FUCK::ManagedHotkey::gKey  },
+		{ "GPMod1", &FUCK::ManagedHotkey::gMod1 },
+		{ "GPMod2", &FUCK::ManagedHotkey::gMod2 },
+	} };
+}
+
 void MenuToolTemplate::ApplyWidgetState()
 {
-	HudWidgetWindow::GetSingleton()->SetOpen(_showWidgets);
-	HudWidgetRightAnchor::GetSingleton()->SetOpen(_showWidgets);
+	HudWidgetWindow::GetSingleton()->SetOpen(_values.showWidgets);
+	HudWidgetRightAnchor::GetSingleton()->SetOpen(_values.showWidgets);
 }
 
 void MenuToolTemplate::LoadSettings()
 {
-	// Called once from FUCK_Register::Install(), so the hotkey and widget visibility apply from the start.
-	// NOTE: To use FUCK::PluginSettings and FUCK::INI, you must have 
-	// #define FUCK_API_ENABLE_SIMPLEINI placed before including "FUCK_API.h" in your PCH.
+	// Called once from FUCK_Register::Install(), so the hotkey and widget visibility apply from the start
 	FUCK::PluginSettings settings;
-	
-	settings.Load([this](CSimpleIniA& ini) {
-		_showWidgets  = FUCK::INI::LoadBool(ini,  "Settings", "ShowWidgets", true);
-		_featureValue = FUCK::INI::LoadFloat(ini, "Settings", "FeatureValue", 50.0f);
-		_selectedType = FUCK::INI::LoadInt(ini,   "Settings", "FeatureType", 0);
-	});
-
-	// FUCK::ManagedHotkey stores Mouse/KB and Gamepad bindings separately.
-	// We load both, including up to 2 chorded modifiers (Shift, Ctrl, Alt) for each.
-	settings.LoadKeybinds([this](CSimpleIniA& ini) {
-		_toggleHotkey.kKey  = FUCK::INI::LoadInt(ini, "Toggle", "Key", 0);
-		_toggleHotkey.kMod1 = FUCK::INI::LoadInt(ini, "Toggle", "Mod1", -1);
-		_toggleHotkey.kMod2 = FUCK::INI::LoadInt(ini, "Toggle", "Mod2", -1);
-		_toggleHotkey.gKey  = FUCK::INI::LoadInt(ini, "Toggle", "GPKey", 0);
-		_toggleHotkey.gMod1 = FUCK::INI::LoadInt(ini, "Toggle", "GPMod1", -1);
-		_toggleHotkey.gMod2 = FUCK::INI::LoadInt(ini, "Toggle", "GPMod2", -1);
-	});
+	settings.Load(SETTINGS, _values);
+	settings.LoadKeybinds([this](CSimpleIniA& ini) { TOGGLE_KEYS.Load(ini, _toggleHotkey); });
 
 	// Ensure widgets immediately reflect the loaded INI state
 	ApplyWidgetState();
 }
 
+void MenuToolTemplate::SaveSettings() const
+{
+	FUCK::PluginSettings().Save(SETTINGS, _values);
+}
+
 void MenuToolTemplate::OnClose()
 {
-	// Triggered automatically when the user clicks away from this tool or closes the menu.
-	FUCK::PluginSettings settings;
-	
-	settings.Save([this](CSimpleIniA& ini) {
-		FUCK::INI::SaveBool(ini,   "Settings", "ShowWidgets",  _showWidgets, true);
-		FUCK::INI::SaveDouble(ini, "Settings", "FeatureValue", _featureValue, 50.0f);
-		FUCK::INI::SaveInt(ini,    "Settings", "FeatureType",  _selectedType, 0);
-	});
-
-	// Delta saving handles removing unchanged keys to keep the INI clean.
-	settings.SaveKeybinds([this](CSimpleIniA& ini) {
-		FUCK::INI::SaveInt(ini, "Toggle", "Key",    _toggleHotkey.kKey, 0);
-		FUCK::INI::SaveInt(ini, "Toggle", "Mod1",   _toggleHotkey.kMod1, -1);
-		FUCK::INI::SaveInt(ini, "Toggle", "Mod2",   _toggleHotkey.kMod2, -1);
-		FUCK::INI::SaveInt(ini, "Toggle", "GPKey",  _toggleHotkey.gKey, 0);
-		FUCK::INI::SaveInt(ini, "Toggle", "GPMod1", _toggleHotkey.gMod1, -1);
-		FUCK::INI::SaveInt(ini, "Toggle", "GPMod2", _toggleHotkey.gMod2, -1);
-	});
+	// Triggered automatically when the user clicks away from this tool or closes the menu
+	SaveSettings();
+	FUCK::PluginSettings().SaveKeybinds([this](CSimpleIniA& ini) { TOGGLE_KEYS.Save(ini, _toggleHotkey); });
 }
 
 bool MenuToolTemplate::OnAsyncInput(const void* e)
@@ -69,14 +66,11 @@ bool MenuToolTemplate::OnAsyncInput(const void* e)
 		if (FUCK::ProcessManagedHotkey(e, _toggleHotkey)) {
 			if (_toggleHotkey.wasTriggered) {
 				// Toggle visibility
-				_showWidgets = !_showWidgets;
+				_values.showWidgets = !_values.showWidgets;
 				ApplyWidgetState();
 
 				// Save instantly so the change persists even if the user never opens the FUCK menu
-				FUCK::PluginSettings settings;
-				settings.Save([this](CSimpleIniA& ini) {
-					FUCK::INI::SaveBool(ini, "Settings", "ShowWidgets", _showWidgets, true);
-				});
+				SaveSettings();
 
 				return true;
 			}
@@ -97,7 +91,7 @@ void MenuToolTemplate::Draw()
 	FUCK::Spacing();
 
 	// Toggles the widgets instantly when clicked
-	if (FUCK::Checkbox("$TEMPL_ShowWidgets"_T, &_showWidgets)) {
+	if (FUCK::Checkbox("$TEMPL_ShowWidgets"_T, &_values.showWidgets)) {
 		ApplyWidgetState();
 	}
 
@@ -116,20 +110,20 @@ void MenuToolTemplate::Draw()
 	FUCK::Spacing();
 
 	// Gray out the rest of the demo if widgets are disabled
-	if (!_showWidgets) {
+	if (!_values.showWidgets) {
 		FUCK::BeginDisabled();
 	}
 
 	FUCK::TextDisabled("$TEMPL_DemoNote"_T);
 	FUCK::Spacing();
 
-	FUCK::SliderFloat("$TEMPL_FeatureIntensity"_T, &_featureValue, 0.0f, 100.0f, "%.1f");
+	FUCK::SliderFloat("$TEMPL_FeatureIntensity"_T, &_values.featureValue, 0.0f, 100.0f, "%.1f");
 
 	// Combo boxes require an array of const char* for the items
 	const char* types[] = { "$TEMPL_OptionA"_T, "$TEMPL_OptionB"_T, "$TEMPL_OptionC"_T };
-	FUCK::Combo("$TEMPL_FeatureType"_T, &_selectedType, types, 3);
+	FUCK::Combo("$TEMPL_FeatureType"_T, &_values.selectedType, types, 3);
 
-	if (!_showWidgets) {
+	if (!_values.showWidgets) {
 		FUCK::EndDisabled();
 	}
 
@@ -137,9 +131,7 @@ void MenuToolTemplate::Draw()
 	FUCK::SeparatorText("$TEMPL_Actions"_T);
 
 	if (FUCK::Button("$TEMPL_Reset"_T)) {
-		_showWidgets  = true;
-		_featureValue = 50.0f;
-		_selectedType = 0;
+		_values = {};           // Every setting back to its default
 		_toggleHotkey.Clear();  // Clears all mapped keys/modifiers for this hotkey
 		ApplyWidgetState();
 	}
